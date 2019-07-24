@@ -1,0 +1,20 @@
+#!/bin/bash
+
+for d in sles/* sled/*; do
+  for fm in dia eps fig jpg png svg odg pdf; do
+    mkdir -p $d/images/src/$fm
+  done
+done
+
+for f in en/images/src/*/*; do
+  for d in sles/* sled/*; do
+    fln=$(echo "$f" | grep -oP '[^/]+/[^/]+$')
+    fmt=$(echo "$fln" | grep -oP '^[^/]+')
+    pure_fln=$(echo "$fln" | grep -oP '[^/]+$')
+    if [[ ! -e $d/images/src/$fln ]]; then
+      cd $d/images/src/$fmt
+      ln -s ../../../../../$f $pure_fln
+      cd - >/dev/null
+    fi
+  done
+done
