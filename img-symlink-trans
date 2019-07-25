@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Self-destruct the repo before:
+# git clean -fd
+
 for d in sles/* sled/*; do
   for fm in dia eps fig jpg png svg odg pdf; do
     mkdir -p $d/images/src/$fm

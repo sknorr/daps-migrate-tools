@@ -14,6 +14,8 @@ while [[ $(grep -oP '\b(linkend|arearefs|xml:id|id)=["'"'"']([^"'"'"'\._]*)[\._]
   sed -i -r 's/\b(linkend|arearefs|xml:id|id)=["'"'"']([^"'"'"'\._]*)([\._]([^"'"'"']*))?["'"'"']/\1="\2-\4"/g' xml/*.xml
 done
 
+sed -i -r 's/\b(linkend|arearefs|xml:id|id)="-+/\1="/g' xml/*.xml
+
 sed -i -r 's/-+"/"/g' xml/*.xml
 
 # remove temp files from sed
