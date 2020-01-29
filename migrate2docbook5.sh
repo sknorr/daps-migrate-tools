@@ -71,7 +71,7 @@ done
 [[ -n "$1" ]] && XML_SOURCE="$1"
 [[ -n "$2" ]] && XML_TARGET="$2"
 
-[[ -d "$DAPSDIR/bin/daps" ]] || exit_on_error "Invalid DAPS directory."
+[[ -e "$DAPSDIR/bin/daps" ]] || exit_on_error "Invalid DAPS directory."
 
 
 #
