@@ -18,9 +18,10 @@ GEEKODOCXSL="${DAPSDIR}/daps-xslt/migrate/db5togeekodoc.xsl"
 #
 XML_SOURCE=xml
 XML_TARGET=xml5
+DOCTYPE=1
 XMLTMPDIR=$(mktemp -d -p /tmp xml.XXX)
 
-ARGS=$(getopt -o h -l help,dapsdir: -n "$ME" -- "$@")
+ARGS=$(getopt -o h -l help,dapsdir:,without-int-doctype -n "$ME" -- "$@")
 
 function exit_on_error {
     echo "ERROR: ${1}" >&2
@@ -37,6 +38,10 @@ Options:
    --dapsdir=<DIR>
        Path to the project directory under which the DAPS
        environment can be found.
+   --without-int-doctype
+       Suppress the internal subset of the DOCTYPE declaration.
+       By default, it imports the "entity-decl.ent" file.
+       With this option, it doesn't.
 
 Arguments:
     INPUTDIR
@@ -60,6 +65,10 @@ while true; do
         fi
         shift 2
         ;;
+    --without-int-doctype)
+      DOCTYPE=0
+      shift
+      ;;
     --help|-h)
         usage
         ;;
@@ -102,7 +111,11 @@ for x in $XMLTMPDIR/*.xml; do
  # Apply these conversions only, if it is NOT a link
  if [[ ! -L $x ]]; then
  echo "> $xml"
- xsltproc --stringparam db5.version "5.1" --output ${XMLTMPDIR}/$xml.tmp $UPGRADEXSLT $x
+ DOCTYPE_PARAM=""
+ if [[ 0 -eq $DOCTYPE ]]; then
+   DOCTYPE_PARAM="--stringparam doctype 0"
+ fi
+ xsltproc $DOCTYPE_PARAM --stringparam db5.version "5.1" --output ${XMLTMPDIR}/$xml.tmp $UPGRADEXSLT $x
  # We remove this old file:
  rm $x
  # Rename back to .xml
