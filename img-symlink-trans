@@ -3,6 +3,11 @@
 # Self-destruct the repo before:
 # git clean -fd
 
+# Only for trans/SLE12GA, the odd branch out, we need a directory name prefix
+prefix=
+
+
+
 spin() {
   if [[ "$1" == 'clear' ]]; then
     echo -e '\b '
@@ -18,14 +23,18 @@ spin() {
   echo -ne "\b$spinstate"
 }
 
-for d in sles/* sled/*; do
+
+for d in ${prefix}sles/* ${prefix}sled/*; do
+  [[ $d == "${prefix}sles/en" ]] || [[ $d == "${prefix}sled/en" ]] && continue
   for fm in dia eps fig jpg png svg odg pdf; do
     mkdir -p $d/images/src/$fm
   done
 done
 
-for f in en/images/src/*/*; do
-  for d in sles/* sled/*; do
+for f in sles/en/images/src/*/*; do
+  for d in ${prefix}sles/* ${prefix}sled/*; do
+    [[ $d == "${prefix}sles/en" ]] || [[ $d == "${prefix}sled/en" ]] && continue
+
     spin
     fln=$(echo "$f" | grep -oP '[^/]+/[^/]+$')
     fmt=$(echo "$fln" | grep -oP '^[^/]+')
