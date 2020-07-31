@@ -18,15 +18,15 @@ done
 sed -i -r 's/^(ROOTID=[^-]+(-[^-]+)+)-+$/\1/g' DC-*
 
 for f in $SOURCE; do
-  cat $f | tr '\n' '\r' | sed -r -e 's/\b(linkend|arearefs|xml:id|id)[\r\t ]*=[\r\t ]*(["'"'"'])/\1=\2/g' | tr '\r' '\n' > $f.0
+  cat $f | tr '\n' '\r' | sed -r -e 's/\b(linkend|arearefs|startref|xml:id|id)[\r\t ]*=[\r\t ]*(["'"'"'])/\1=\2/g' | tr '\r' '\n' > $f.0
   mv $f.0 $f
 done
 
-while [[ $(grep -oP '\b(linkend|arearefs|xml:id|id)=["'"'"']([^"'"'"'\._]*)[\._]' $SOURCE) ]]; do
-  sed -i -r 's/\b(linkend|arearefs|xml:id|id)=["'"'"']([^"'"'"'\._]*)([\._]([^"'"'"']*))?["'"'"']/\1="\2-\4"/g' $SOURCE
+while [[ $(grep -oP '\b(linkend|arearefs|startref|xml:id|id)=["'"'"']([^"'"'"'\._]*)[\._]' $SOURCE) ]]; do
+  sed -i -r 's/\b(linkend|arearefs|startref|xml:id|id)=["'"'"']([^"'"'"'\._]*)([\._]([^"'"'"']*))?["'"'"']/\1="\2-\4"/g' $SOURCE
 done
 
-sed -i -r 's/\b(linkend|arearefs|xml:id|id)="-+/\1="/g' $SOURCE
+sed -i -r 's/\b(linkend|arearefs|startref|xml:id|id)="-+/\1="/g' $SOURCE
 
 sed -i -r 's/-+"/"/g' $SOURCE
 
