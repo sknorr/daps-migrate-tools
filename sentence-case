@@ -33,8 +33,8 @@ for f in $source; do
     ini=1
     pro=""
     while [[ "$unp" ]]; do
-     wor=$(echo "$unp" | grep -Po '^[^ -]*.')
-     unp=$(echo "$unp" | sed -r 's_^[^ -]*.__')
+     wor=$(echo "$unp" | grep -Po '^[^ /-]*.')
+     unp=$(echo "$unp" | sed -r 's_^[^ (/-]*.__')
      # never change the first word
      if [[ $ini -eq 1 ]]; then
        pro+="$wor"
