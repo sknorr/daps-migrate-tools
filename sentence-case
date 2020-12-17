@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Either use the default ("xml/*.xml") or the arguments passed on the command line:
+source=${@:-xml/*.xml}
+
+me="${0##*/}"
+medir=$(dirname "$0")
+
+verbose=0
+
+if [ "-h" = "$1" ] || [ "--help" = "$1" ]; then
+  echo "$ME [-h|--help]"
+  echo "$ME [-v|--verbose] [XML_FILE]..."
+  exit 0
+fi
+
+if [ "-v" = "$1" ] || [ "--verbose" = "$1" ]; then
+  verbose=1
+fi
+
+for f in $source; do
+  [[ "$verbose" = 1 ]] && echo "- terms/titles in [ $f ]"
+  ttl=$(grep -Pn '<(title|term)>' "$f")
+  len=$(echo -e "$ttl" | wc -l)
+  for i in $(seq 1 ${len}); do
+    ful=$(echo -e "$ttl" | sed -n "$i p")
+    num=$(echo "$ful" | grep -Po '^[0-9]+')
+    lin=$(echo "$ful" | sed -r 's/^[0-9]+://')
+    pre=$(echo "$lin" | grep -Po '^.*<(title|term)>')
+    pos=$(echo "$lin" | grep -Po '</(title|term)>.*$')
+    met=$(echo "$lin" | sed -r -e 's_^.*<(title|term)>__' -e 's_</(title|term)>.*$__')
+    unp="$met"
+    ini=1
+    pro=""
+    while [[ "$unp" ]]; do
+     wor=$(echo "$unp" | grep -Po '^[^ -]*.')
+     unp=$(echo "$unp" | sed -r 's_^[^ -]*.__')
+     # never change the first word
+     if [[ $ini -eq 1 ]]; then
+       pro+="$wor"
+     # never change acronyms, which we assume are characterized by at least two leading capitals
+     elif [[ $(echo "$wor" | grep "^[A-Z][A-Z]" ) ]]; then
+       pro+="$wor"
+     # never change the words from the list
+     elif [[ $(echo "$wor" | grep -F -f "$medir/keep-case-list" ) ]]; then
+       pro+="$wor"
+     # -> change these things
+     elif [[ $(echo "$wor" | grep "^[A-Z]" ) ]]; then
+       pro+=$(echo -n "$wor" | sed -r 's/(.)(.*)/\L\1\E\2/')
+     # never change anything else
+     else
+       pro+="$wor"
+     fi
+     ini=0
+    done
+    echo "${num}|${pro}"
+    rea=$(echo "${pre}${pro}${pos}" | sed -e 's_/_\\/_g' -e 's_\&_\\\&_g' )
+    sed -i "${num}"' s/.*/'"$rea"'/' "$f"
+  done
+done
