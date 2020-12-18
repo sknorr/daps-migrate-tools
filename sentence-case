@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Either use the default ("xml/*.xml") or the arguments passed on the command line:
-source=${@:-xml/*.xml}
 
 me="${0##*/}"
 medir=$(dirname "$0")
@@ -16,7 +15,10 @@ fi
 
 if [ "-v" = "$1" ] || [ "--verbose" = "$1" ]; then
   verbose=1
+  shift
 fi
+
+source=${@:-xml/*.xml}
 
 for f in $source; do
   [[ "$verbose" = 1 ]] && echo "- terms/titles in [ $f ]"
@@ -35,9 +37,28 @@ for f in $source; do
     pro=""
     [[ "$verbose" = 1 ]] && echo "${num} -| ${unp}"
     while [[ "$unp" ]]; do
-     wor=$(echo "$unp" | grep -Po '^[^ ;(/-]*.')
-     unppre="$unp"
-     unp=$(echo "$unp" | sed -r 's_^[^ ;(/-]*.__')
+     # self-closing tags
+     if [[ $(echo "$unp" | grep -Po "^<[^ >]+ *([^= >]+=['"'"'"][^'"'"'"]*['"'"'"])* */>") ]]; then
+       wor=$(echo "$unp" | grep -Po "^<[^ >]+ *([^= >]+=['"'"'"][^'"'"'"]*['"'"'"])* */>")
+       unp=$(echo "$unp" | sed -r "s_^<[^ >]+ *([^= >]+=['"'"'"][^'"'"'"]*['"'"'"])* */>__")
+       pro+="$wor"
+       continue
+     # normal tags
+     elif [[ $(echo "$unp" | grep "^<") ]]; then
+       wor=$(echo "$unp" | grep -Po '^<[^>]+>[^<]+<[^>]+>')
+       unp=$(echo "$unp" | sed -r 's_^<[^>]+>[^<]+<[^>]+>__')
+       pro+="$wor"
+       continue
+     #entities
+     elif [[ $(echo "$unp" | grep "^\&") ]]; then
+       wor=$(echo "$unp" | grep -Po '^\&[^;];')
+       unp=$(echo "$unp" | sed -r 's_^\&[^;];__')
+       pro+="$wor"
+       continue
+     else
+       wor=$(echo "$unp" | grep -Po '^[^ <;(/-]*.')
+       unp=$(echo "$unp" | sed -r 's_^[^ <;(/-]*.__')
+     fi
      # never change the first word
      if [[ $ini -eq 1 ]]; then
        pro+="$wor"
@@ -57,8 +78,9 @@ for f in $source; do
      fi
      ini=0
     done
-    [[ "$verbose" = 1 ]] && echo "${num} +| ${pro}"
+    [[ "$verbose" = 1 ]] && echo -e "${num} +| ${pro}\n"
     rea=$(echo "${pre}${pro}${pos}" | sed -e 's_/_\\/_g' -e 's_\&_\\\&_g' )
     sed -i "${num}"' s/.*/'"$rea"'/' "$f"
   done
+  [[ "$verbose" = 1 ]] && echo -e "----\n"
 done
