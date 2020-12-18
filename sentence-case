@@ -51,8 +51,8 @@ for f in $source; do
        continue
      #entities
      elif [[ $(echo "$unp" | grep "^\&") ]]; then
-       wor=$(echo "$unp" | grep -Po '^\&[^;];')
-       unp=$(echo "$unp" | sed -r 's_^\&[^;];__')
+       wor=$(echo "$unp" | grep -Po '^\&[^;]+;')
+       unp=$(echo "$unp" | sed -r 's_^\&[^;]+;__')
        pro+="$wor"
        continue
      else
