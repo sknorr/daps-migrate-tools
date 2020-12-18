@@ -35,9 +35,9 @@ for f in $source; do
     pro=""
     [[ "$verbose" = 1 ]] && echo "${num} -| ${unp}"
     while [[ "$unp" ]]; do
-     wor=$(echo "$unp" | grep -Po '^[^ (/-]*.')
+     wor=$(echo "$unp" | grep -Po '^[^ ;(/-]*.')
      unppre="$unp"
-     unp=$(echo "$unp" | sed -r 's_^[^ (/-]*.__')
+     unp=$(echo "$unp" | sed -r 's_^[^ ;(/-]*.__')
      # never change the first word
      if [[ $ini -eq 1 ]]; then
        pro+="$wor"
