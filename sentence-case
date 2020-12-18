@@ -56,8 +56,8 @@ for f in $source; do
        pro+="$wor"
        continue
      else
-       wor=$(echo "$unp" | grep -Po '^[^ <;(/-]*.')
-       unp=$(echo "$unp" | sed -r 's_^[^ <;(/-]*.__')
+       wor=$(echo "$unp" | grep -Po '^[^ <>;(/-]*.')
+       unp=$(echo "$unp" | sed -r 's_^[^ <>;(/-]*.__')
      fi
      # never change the first word
      if [[ $ini -eq 1 ]]; then
