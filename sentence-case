@@ -22,6 +22,7 @@ for f in $source; do
   [[ "$verbose" = 1 ]] && echo "- terms/titles in [ $f ]"
   ttl=$(grep -Pn '<(title|term)>' "$f")
   len=$(echo -e "$ttl" | wc -l)
+  [[ "$ttl" == "" ]] && continue
   for i in $(seq 1 ${len}); do
     ful=$(echo -e "$ttl" | sed -n "$i p")
     num=$(echo "$ful" | grep -Po '^[0-9]+')
@@ -32,8 +33,10 @@ for f in $source; do
     unp="$met"
     ini=1
     pro=""
+    [[ "$verbose" = 1 ]] && echo "${num} -| ${unp}"
     while [[ "$unp" ]]; do
-     wor=$(echo "$unp" | grep -Po '^[^ /-]*.')
+     wor=$(echo "$unp" | grep -Po '^[^ (/-]*.')
+     unppre="$unp"
      unp=$(echo "$unp" | sed -r 's_^[^ (/-]*.__')
      # never change the first word
      if [[ $ini -eq 1 ]]; then
@@ -42,7 +45,8 @@ for f in $source; do
      elif [[ $(echo "$wor" | grep "^[A-Z][A-Z]" ) ]]; then
        pro+="$wor"
      # never change the words from the list
-     elif [[ $(echo "$wor" | grep -F -f "$medir/keep-case-list" ) ]]; then
+     # -F fixed-strings, no regex support; -w word-based; -f load strings from file
+     elif [[ $(echo "$wor" | grep -Fw -f "$medir/keep-case-list" ) ]]; then
        pro+="$wor"
      # -> change these things
      elif [[ $(echo "$wor" | grep "^[A-Z]" ) ]]; then
@@ -53,7 +57,7 @@ for f in $source; do
      fi
      ini=0
     done
-    echo "${num}|${pro}"
+    [[ "$verbose" = 1 ]] && echo "${num} +| ${pro}"
     rea=$(echo "${pre}${pro}${pos}" | sed -e 's_/_\\/_g' -e 's_\&_\\\&_g' )
     sed -i "${num}"' s/.*/'"$rea"'/' "$f"
   done
